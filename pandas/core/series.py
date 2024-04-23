@@ -3226,8 +3226,13 @@ class Series(base.IndexOpsMixin, NDFrame):  # type: ignore[misc]
 
         if this.dtype.kind == "M" and other.dtype.kind != "M":
             other = to_datetime(other)
-        combined = concat([this, other])
-        combined = combined.reindex(new_index)
+        if not (this.empty or other.empty):
+            combined = concat([this, other])
+            combined = combined.reindex(new_index)
+        elif this.empty:
+            combined = other
+        else:
+            combined = this
         return combined.__finalize__(self, method="combine_first")
 
     def update(self, other: Series | Sequence | Mapping) -> None:
